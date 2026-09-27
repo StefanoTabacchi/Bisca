@@ -117,7 +117,8 @@ label.lbl{display:block;font-weight:600;margin:0 0 6px}
 .bets button{width:56px;height:56px;border-radius:50%;border:0;background:var(--ivory);color:var(--ink);font-family:var(--display);font-size:24px;font-weight:700}
 .bets button:disabled{background:transparent;color:#6f917f;box-shadow:inset 0 0 0 1.5px var(--felt-line);text-decoration:line-through}
 .sortbar{display:flex;justify-content:flex-end;margin-bottom:6px}
-.iconbtn.on{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.sortbtn{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--felt-line);background:var(--felt-deep);display:grid;place-items:center;padding:0}
+.sortbtn.on{background:var(--gold);border-color:var(--gold);color:var(--ink)}
 .hand{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;padding-top:6px}
 .hand .card:not(:disabled):hover{transform:translateY(-6px)}
 .hand.active .card:not(:disabled){box-shadow:0 0 0 2px var(--gold),0 6px 14px rgba(0,0,0,.3)}
@@ -345,15 +346,6 @@ function backToLobby(s) {
   Object.assign(s, { phase: 'lobby', order: [], hands: {}, bets: {}, won: {}, table: [], handResult: null, winners: null, handNo: 0 });
 }
 
-// Mossa automatica per un giocatore disconnesso
-function autoMove(s) {
-  const id = currentTurn(s);
-  if (s.phase === 'betting') {
-    const f = forbiddenBet(s);
-    return placeBet(s, id, f === 0 ? 1 : 0);
-  }
-  if (s.phase === 'playing') return playCard(s, id, s.hands[id][0], false);
-}
 
 // Cosa vede ciascun giocatore
 function viewFor(s, me) {
@@ -396,7 +388,12 @@ if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(
 const ui = { screen: 'home', view: null, error: '', busy: false, rules: false, paolo: null, conn: 'ok', sort: 0 };
 // Ordinamento della mano, solo sul proprio schermo: 0 = come distribuite, 1 = dalla più alta, 2 = dalla più bassa.
 // Il Paolo conta sempre come la più alta.
-const SORT_LABELS = ['Ordina', 'Dalla più alta', 'Dalla più bassa'];
+const SORT_LABELS = ['Ordina le carte', 'Ordinate dalla più alta', 'Ordinate dalla più bassa'];
+const SORT_ICONS = [
+  '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16M8 4L5 7M8 4l3 3M16 20V4M16 20l-3-3M16 20l3-3"/></svg>',
+  '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor"><rect x="3" y="3" width="5" height="18" rx="1.5"/><rect x="9.5" y="9" width="5" height="12" rx="1.5"/><rect x="16" y="15" width="5" height="6" rx="1.5"/></svg>',
+  '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="currentColor"><rect x="3" y="15" width="5" height="6" rx="1.5"/><rect x="9.5" y="9" width="5" height="12" rx="1.5"/><rect x="16" y="3" width="5" height="18" rx="1.5"/></svg>',
+];
 const sortKey = c => isPaolo(c) ? 1000 : strength(c);
 function sortedHand(hand){
   const h = [...hand];
@@ -475,7 +472,6 @@ function hostAction(pid, d, fail){
     if (d.t === 'start') err = startGame(game);
     else if (d.t === 'kick') { removePlayer(game, d.id); for (const [c,id] of conns) if (id===d.id){ c.send({t:'error',msg:"L'host ti ha rimosso dalla stanza",fatal:true}); conns.delete(c); setTimeout(()=>c.close(),300);} }
     else if (d.t === 'next') nextHand(game);
-    else if (d.t === 'auto') err = autoMove(game);
     else if (d.t === 'lobby') backToLobby(game);
     else if (d.t === 'settings' && game.phase === 'lobby') { game.settings = { ...game.settings, ...d.settings }; game.players.forEach(p=>p.lives=game.settings.lives); }
   }
@@ -695,7 +691,7 @@ function renderGame(v){
 
   const handHtml = v.hiddenCard
     ? `<div class="hand">${backHtml()}</div>`
-    : `${(v.myHand||[]).length > 1 ? `<div class="sortbar"><button class="iconbtn${ui.sort?' on':''}" id="sort" aria-label="Ordina le carte: ${SORT_LABELS[ui.sort].toLowerCase()}">${SORT_LABELS[ui.sort]}</button></div>` : ''}
+    : `${(v.myHand||[]).length > 1 ? `<div class="sortbar"><button class="sortbtn${ui.sort?' on':''}" id="sort" aria-label="${SORT_LABELS[ui.sort]}" title="${SORT_LABELS[ui.sort]}">${SORT_ICONS[ui.sort]}</button></div>` : ''}
       <div class="hand${myTurn&&v.phase==='playing'?' active':''}">${sortedHand(v.myHand||[]).map(c => cardHtml(c, { click:true, disabled: !(myTurn && v.phase==='playing') })).join('')}</div>`;
 
   const allBet = v.order.every(id => v.players.find(p=>p.id===id).bet !== undefined);
@@ -729,7 +725,7 @@ function renderGame(v){
         : `<span class="muted">${v.phase==='betting'?'Prima i pronostici, poi si gioca':'Il tavolo è vuoto'}</span>`}</div>
       <div class="status" aria-live="polite">${status}</div>
       ${hint?`<p class="hint">${hint}</p>`:''}
-      ${host && turnPlayer && !turnPlayer.online ? `<button class="btn ghost" data-do="auto" style="margin-bottom:10px">${esc(turnPlayer.name)} è offline: gioca al posto suo</button>` : ''}
+      ${turnPlayer && !turnPlayer.online ? `<p class="hint">${esc(turnPlayer.name)} è offline: si aspetta che rientri riaprendo il link.</p>` : ''}
       ${action}
       ${me && !me.out ? handHtml : v.allHands ? `<div class="spect"><p class="hint">Sei fuori dalla partita: da spettatore vedi le carte di tutti.</p>
         ${v.order.map(id => `<div class="srow${id===v.turn?' now':''}"><span>${esc(nameOf(v,id))}</span><div class="scards">${(v.allHands[id]||[]).map(c=>cardHtml(c,{small:true})).join('') || '<span class="muted">nessuna carta</span>'}</div></div>`).join('')}</div>`
