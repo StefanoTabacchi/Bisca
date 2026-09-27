@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173d2f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Bischino</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<style>
+:root{
+  --felt:#1f4d3b; --felt-deep:#173d2f; --felt-line:#2b6450;
+  --ivory:#fbf6e9; --ivory-dim:#e9e1cc; --ink:#1b1f1d; --muted:#a9c2b6;
+  --coppe:#b8312b; --denari:#c9951a; --spade:#2b5c9a; --bastoni:#2f7a45;
+  --gold:#e8bd4a; --danger:#e0725f;
+  --display:'Fraunces', Georgia, 'Times New Roman', serif;
+  --ui:'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{
+  background:var(--felt) radial-gradient(ellipse at 50% 35%, #25583f 0%, var(--felt) 55%, var(--felt-deep) 100%) fixed;
+  color:var(--ivory); font-family:var(--ui); font-size:16px; line-height:1.45;
+  -webkit-tap-highlight-color:transparent;
+}
+#app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:12px 14px 18px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+h1,h2{font-family:var(--display);font-weight:700;margin:0;letter-spacing:-.01em}
+.muted{color:var(--muted)}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px 16px;font-weight:700;font-size:17px;
+  background:var(--ivory);color:var(--ink)}
+.btn.gold{background:var(--gold)}
+.btn.ghost{background:transparent;color:var(--ivory);border:1.5px solid var(--felt-line)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn + .btn{margin-top:10px}
+input.field{width:100%;border:1.5px solid var(--felt-line);background:var(--felt-deep);color:var(--ivory);
+  border-radius:12px;padding:13px 14px;font:inherit;font-size:17px}
+input.field::placeholder{color:#7fa393}
+label.lbl{display:block;font-weight:600;margin:0 0 6px}
+
+/* Home */
+.home{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:20px 4px}
+.brand{text-align:center}
+.brand h1{font-size:64px;line-height:1;font-style:italic}
+.brand p{margin:10px 0 0;color:var(--muted)}
+.fan{display:flex;justify-content:center;height:112px;margin-bottom:14px}
+.fan .card{margin:0 -14px;transform-origin:50% 120%}
+.fan .card:nth-child(1){transform:rotate(-16deg)}
+.fan .card:nth-child(2){transform:rotate(-5deg) translateY(-6px)}
+.fan .card:nth-child(3){transform:rotate(6deg) translateY(-6px)}
+.fan .card:nth-child(4){transform:rotate(17deg)}
+.panel{background:rgba(10,30,22,.35);border:1px solid var(--felt-line);border-radius:18px;padding:18px}
+.row{display:flex;gap:10px}
+.row > *{flex:1}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);margin:16px 0;font-size:14px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--felt-line)}
+.code-input{text-transform:uppercase;letter-spacing:.2em;font-weight:700;text-align:center}
+
+/* Lobby */
+.lobby{display:flex;flex-direction:column;gap:18px;padding-top:8px}
+.codebox{text-align:center;padding:22px 16px}
+.codebox .code{font-family:var(--display);font-size:56px;letter-spacing:.14em;line-height:1.1;margin:4px 0 14px;padding-left:.14em}
+.plist{list-style:none;margin:0;padding:0}
+.plist li{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--felt-line)}
+.plist li:last-child{border-bottom:0}
+.plist .nm{flex:1;font-weight:600}
+.pill{font-size:13px;padding:2px 9px;border-radius:99px;background:var(--felt-deep);color:var(--muted)}
+.x{border:0;background:none;color:var(--muted);font-size:14px;text-decoration:underline;padding:4px}
+.stepper{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.stepper .ctl{display:flex;align-items:center;gap:14px}
+.stepper button{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--felt-line);background:var(--felt-deep);font-size:20px;line-height:1}
+.stepper b{font-family:var(--display);font-size:24px;min-width:24px;text-align:center}
+
+/* Game */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.top h2{font-size:22px}
+.top .sub{font-size:14px;color:var(--muted)}
+.iconbtn{border:1.5px solid var(--felt-line);background:var(--felt-deep);border-radius:99px;padding:6px 12px;font-size:14px;font-weight:600}
+.seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:8px}
+.seat{position:relative;border-radius:14px;padding:9px 10px 8px;background:rgba(10,30,22,.4);border:1.5px solid transparent;min-height:74px;transition:border-color .2s}
+.seat.turn{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,189,74,.18)}
+.seat.me{background:rgba(251,246,233,.08)}
+.seat.off{opacity:.5}
+.seat.out .sn{text-decoration:line-through;color:var(--muted)}
+.sn{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:18px}
+.dealer{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--ivory);color:var(--ink);font-size:11px;font-weight:700;display:grid;place-items:center}
+.lives{display:flex;gap:3px;margin:4px 0 5px;flex-wrap:wrap}
+.lives i{width:9px;height:9px;border-radius:50%;background:var(--danger)}
+.lives i.lost{background:transparent;box-shadow:inset 0 0 0 1.5px #5b8373}
+.score{font-size:13px;color:var(--muted)}
+.score b{color:var(--ivory);font-size:15px}
+.seat .mini{margin-top:6px}
+.table{flex:1;min-height:170px;margin:14px 0 10px;border-radius:22px;border:1.5px dashed var(--felt-line);
+  display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px;padding:14px}
+.played{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);max-width:74px}
+.played span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:74px}
+.played.win .card{transform:translateY(-8px);box-shadow:0 0 0 3px var(--gold),0 10px 18px rgba(0,0,0,.35)}
+.played.win span{color:var(--gold);font-weight:700}
+.status{text-align:center;font-family:var(--display);font-size:21px;min-height:30px;margin-bottom:10px}
+.hint{text-align:center;color:var(--muted);font-size:14px;margin:-4px 0 12px}
+.bets{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.bets button{width:56px;height:56px;border-radius:50%;border:0;background:var(--ivory);color:var(--ink);font-family:var(--display);font-size:24px;font-weight:700}
+.bets button:disabled{background:transparent;color:#6f917f;box-shadow:inset 0 0 0 1.5px var(--felt-line);text-decoration:line-through}
+.hand{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;padding-top:6px}
+.hand .card:not(:disabled):hover{transform:translateY(-6px)}
+.hand.active .card:not(:disabled){box-shadow:0 0 0 2px var(--gold),0 6px 14px rgba(0,0,0,.3)}
+.results{width:100%;border-collapse:collapse;font-size:15px}
+.results th{font-weight:600;color:var(--muted);text-align:right;padding:4px 6px;font-size:13px}
+.results td{padding:8px 6px;text-align:right;border-top:1px solid var(--felt-line)}
+.results th:first-child,.results td:first-child{text-align:left}
+.results .minus{color:var(--danger);font-weight:700}
+.results .ok{color:#8fd1a6;font-weight:700}
+.winner{text-align:center;padding:10px 0 18px}
+.winner h2{font-size:40px;font-style:italic}
+
+/* Carte */
+.card{--c:var(--ink);position:relative;width:60px;height:90px;flex:none;border:0;padding:0;border-radius:8px;
+  background:var(--ivory);color:var(--c);box-shadow:0 3px 8px rgba(0,0,0,.3);transition:transform .15s,box-shadow .15s;
+  display:grid;place-items:center}
+.card:disabled{cursor:default}
+.card .i{position:absolute;font-family:var(--display);font-weight:700;font-size:17px;line-height:1}
+.card .i.tl{top:5px;left:6px}
+.card .i.br{bottom:5px;right:6px;transform:rotate(180deg)}
+.card svg{width:30px;height:30px}
+.card.s-coppe{--c:var(--coppe)} .card.s-denari{--c:var(--denari)} .card.s-spade{--c:var(--spade)} .card.s-bastoni{--c:var(--bastoni)}
+.card.paolo{background:linear-gradient(160deg,#fff8e0,#f3e2a8)}
+.card .tag{position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;letter-spacing:.04em;background:var(--ink);color:var(--gold);padding:1px 5px;border-radius:5px 5px 0 0}
+.card.small{width:40px;height:60px;border-radius:6px}
+.card.small .i{font-size:13px}
+.card.small svg{width:20px;height:20px}
+.card.small .tag{font-size:7px}
+.card.back{background:repeating-linear-gradient(45deg,#8e2a24 0 6px,#a8362e 6px 12px);border:3px solid var(--ivory)}
+.card.back::after{content:"?";font-family:var(--display);font-size:30px;font-weight:700;color:var(--ivory)}
+
+/* Modali */
+.overlay{position:fixed;inset:0;background:rgba(5,15,11,.72);display:grid;place-items:end center;z-index:10;padding:12px}
+.sheet{width:100%;max-width:520px;max-height:86vh;overflow:auto;background:var(--felt-deep);border:1px solid var(--felt-line);border-radius:20px;padding:20px;margin-bottom:env(safe-area-inset-bottom,0px)}
+.sheet h2{font-size:26px;margin-bottom:10px}
+.sheet p,.sheet li{max-width:65ch}
+.sheet ul{padding-left:20px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ivory);color:var(--ink);padding:10px 16px;border-radius:99px;font-weight:600;z-index:20;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.banner{background:#6b2a22;border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:15px;text-align:center}
+.center{text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ===== REGOLE DEL GIOCO (modificabili) =====
+// Semi dal più debole al più forte
+const SUITS = ['bastoni', 'spade', 'coppe', 'denari'];
+const SUIT_NAMES = { bastoni: 'Bastoni', spade: 'Spade', coppe: 'Coppe', denari: 'Denari' };
+// Valori dal più debole al più forte: asso, 2..7, fante, cavallo, re
+const RANK_LABELS = ['A', '2', '3', '4', '5', '6', '7', 'F', 'C', 'R'];
+const RANK_NAMES = ['Asso', 'Due', 'Tre', 'Quattro', 'Cinque', 'Sei', 'Sette', 'Fante', 'Cavallo', 'Re'];
+// Il "Paolo": la carta che vale la più alta o la più bassa, a scelta di chi la gioca
+const PAOLO = { suit: 'denari', rank: 0 };
+const MAX_PLAYERS = 8;
+const DEFAULTS = { lives: 3, maxCards: 5 };
+
+// Carta = numero 0..39: seme * 10 + valore
+const cardSuit = c => SUITS[Math.floor(c / 10)];
+const cardRank = c => c % 10;
+const PAOLO_ID = SUITS.indexOf(PAOLO.suit) * 10 + PAOLO.rank;
+const isPaolo = c => c === PAOLO_ID;
+const cardName = c => isPaolo(c) ? 'il Paolo' : `${RANK_NAMES[cardRank(c)]} di ${SUIT_NAMES[cardSuit(c)]}`;
+
+function strength(c, high) {
+  if (isPaolo(c)) return high === false ? -1 : 1000;
+  return cardRank(c) * 4 + Math.floor(c / 10);
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function createGame(code, hostId) {
+  return {
+    code, hostId, settings: { ...DEFAULTS }, players: [],
+    phase: 'lobby', handNo: 0, handSize: 0, dealer: 0, order: [],
+    hands: {}, bets: {}, won: {}, turnIdx: 0, table: [], trickWinner: null,
+    handResult: null, winners: null,
+  };
+}
+
+const findPlayer = (s, id) => s.players.find(p => p.id === id);
+const alivePlayers = s => s.players.filter(p => !p.out);
+const startSize = (s, n) => Math.max(1, Math.min(s.settings.maxCards, Math.floor(40 / n)));
+
+function addPlayer(s, id, name) {
+  const existing = findPlayer(s, id);
+  if (existing) { existing.name = name || existing.name; existing.online = true; return null; }
+  if (s.phase !== 'lobby') return 'La partita è già iniziata';
+  if (s.players.length >= MAX_PLAYERS) return `La stanza è piena (massimo ${MAX_PLAYERS})`;
+  s.players.push({ id, name, lives: s.settings.lives, online: true, out: false });
+  return null;
+}
+
+function removePlayer(s, id) {
+  if (s.phase !== 'lobby') return;
+  s.players = s.players.filter(p => p.id !== id);
+}
+
+function startGame(s) {
+  if (s.players.length < 2) return 'Servono almeno 2 giocatori';
+  s.players.forEach(p => { p.lives = s.settings.lives; p.out = false; });
+  s.dealer = Math.floor(Math.random() * s.players.length);
+  s.handNo = 0;
+  s.handSize = startSize(s, s.players.length);
+  deal(s);
+  return null;
+}
+
+function deal(s) {
+  const n = s.players.length;
+  const order = [];
+  for (let k = 1; k <= n; k++) {
+    const p = s.players[(s.dealer + k) % n];
+    if (!p.out) order.push(p.id); // il mazziere è l'ultimo
+  }
+  s.order = order;
+  const deck = shuffle([...Array(40).keys()]);
+  s.hands = {}; s.bets = {}; s.won = {};
+  order.forEach(id => {
+    s.hands[id] = deck.splice(0, s.handSize).sort((a, b) => strength(a) - strength(b));
+    s.won[id] = 0;
+  });
+  s.handNo++;
+  s.turnIdx = 0; s.table = []; s.trickWinner = null; s.handResult = null;
+  s.phase = 'betting';
+}
+
+function forbiddenBet(s) {
+  if (s.phase !== 'betting' || s.turnIdx !== s.order.length - 1) return null;
+  const sum = Object.values(s.bets).reduce((a, b) => a + b, 0);
+  const f = s.handSize - sum;
+  return f >= 0 && f <= s.handSize ? f : null;
+}
+
+const currentTurn = s => s.order[s.turnIdx];
+
+function placeBet(s, id, n) {
+  if (s.phase !== 'betting' || currentTurn(s) !== id) return 'Non è il tuo turno';
+  if (!Number.isInteger(n) || n < 0 || n > s.handSize) return 'Pronostico non valido';
+  if (n === forbiddenBet(s)) return `Non puoi dire ${n}: la somma farebbe pari con le carte in mano`;
+  s.bets[id] = n;
+  s.turnIdx++;
+  if (s.turnIdx < s.order.length) return null;
+  s.turnIdx = 0;
+  if (s.handSize === 1) {
+    // Mano da una carta: si scoprono tutte insieme.
+    // Il Paolo vale in base alla chiamata di chi lo ha: 1 = alto, 0 = basso
+    s.table = s.order.map(pid => ({ id: pid, card: s.hands[pid][0], high: s.bets[pid] >= 1 }));
+    s.order.forEach(pid => { s.hands[pid] = []; });
+    closeTrick(s);
+  } else {
+    s.phase = 'playing';
+  }
+  return null;
+}
+
+function playCard(s, id, card, high) {
+  if (s.phase !== 'playing' || currentTurn(s) !== id) return 'Non è il tuo turno';
+  const hand = s.hands[id];
+  const i = hand.indexOf(card);
+  if (i < 0) return 'Non hai questa carta';
+  hand.splice(i, 1);
+  s.table.push({ id, card, high: isPaolo(card) ? high !== false : undefined });
+  if (s.table.length === s.order.length) closeTrick(s);
+  else s.turnIdx = (s.turnIdx + 1) % s.order.length;
+  return null;
+}
+
+function closeTrick(s) {
+  let best = s.table[0];
+  for (const t of s.table) if (strength(t.card, t.high) > strength(best.card, best.high)) best = t;
+  s.won[best.id]++;
+  s.trickWinner = best.id;
+  s.phase = 'trick';
+}
+
+// Chiamata dall'host dopo che la presa è stata mostrata
+function afterTrick(s) {
+  if (s.phase !== 'trick') return;
+  if (s.hands[s.order[0]].length === 0) return endHand(s);
+  s.turnIdx = s.order.indexOf(s.trickWinner);
+  s.table = []; s.trickWinner = null;
+  s.phase = 'playing';
+}
+
+function endHand(s) {
+  s.handResult = s.order.map(id => {
+    const p = findPlayer(s, id);
+    const delta = Math.abs(s.bets[id] - s.won[id]);
+    const before = p.lives;
+    p.lives -= delta;
+    if (p.lives <= 0) p.out = true;
+    return { id, bet: s.bets[id], won: s.won[id], delta, before, lives: p.lives };
+  });
+  s.table = []; s.trickWinner = null;
+  const alive = alivePlayers(s);
+  if (alive.length <= 1) {
+    if (alive.length === 1) s.winners = [alive[0].id];
+    else {
+      const max = Math.max(...s.handResult.map(r => r.lives));
+      s.winners = s.handResult.filter(r => r.lives === max).map(r => r.id);
+    }
+    s.phase = 'gameover';
+  } else {
+    s.phase = 'handover';
+  }
+}
+
+function nextHand(s) {
+  if (s.phase !== 'handover') return;
+  const n = s.players.length;
+  do { s.dealer = (s.dealer + 1) % n; } while (s.players[s.dealer].out);
+  s.handSize = s.handSize - 1 >= 1 ? s.handSize - 1 : startSize(s, alivePlayers(s).length);
+  deal(s);
+}
+
+function backToLobby(s) {
+  s.players = s.players.filter(p => p.online);
+  s.players.forEach(p => { p.lives = s.settings.lives; p.out = false; });
+  Object.assign(s, { phase: 'lobby', order: [], hands: {}, bets: {}, won: {}, table: [], handResult: null, winners: null, handNo: 0 });
+}
+
+// Mossa automatica per un giocatore disconnesso
+function autoMove(s) {
+  const id = currentTurn(s);
+  if (s.phase === 'betting') {
+    const f = forbiddenBet(s);
+    return placeBet(s, id, f === 0 ? 1 : 0);
+  }
+  if (s.phase === 'playing') return playCard(s, id, s.hands[id][0], false);
+}
+
+// Cosa vede ciascun giocatore
+function viewFor(s, me) {
+  const oneCard = s.handSize === 1 && s.phase === 'betting';
+  return {
+    code: s.code, me, hostId: s.hostId, phase: s.phase, settings: s.settings,
+    handNo: s.handNo, handSize: s.handSize,
+    dealerId: s.players[s.dealer] ? s.players[s.dealer].id : null,
+    order: s.order,
+    turn: ['betting', 'playing'].includes(s.phase) ? currentTurn(s) : null,
+    forbidden: currentTurn(s) === me ? forbiddenBet(s) : null,
+    players: s.players.map(p => ({
+      id: p.id, name: p.name, lives: p.lives, online: p.online, out: p.out,
+      bet: s.bets[p.id], won: s.won[p.id], cards: (s.hands[p.id] || []).length,
+      shown: oneCard && p.id !== me && s.hands[p.id] ? s.hands[p.id][0] : null,
+    })),
+    myHand: oneCard ? null : (s.hands[me] || []),
+    hiddenCard: oneCard && s.hands[me] ? true : false,
+    table: s.table, trickWinner: s.trickWinner,
+    handResult: s.handResult, winners: s.winners,
+  };
+}
+
+
+</script>
+<script>
+// ===== RETE E INTERFACCIA =====
+const PREFIX = 'bischino-app-v1-';
+const $app = document.getElementById('app');
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} },
+};
+let token = store.get('bis-token');
+if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); store.set('bis-token', token); }
+
+const ui = { screen: 'home', view: null, error: '', busy: false, rules: false, paolo: null, conn: 'ok' };
+let peer = null, hostConn = null, isHost = false, game = null, trickTimer = null, retryTimer = null;
+const conns = new Map(); // host: conn -> playerId
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
+const newCode = () => Array.from({length:4},()=> 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random()*24)]).join('');
+const shareUrl = code => location.origin + location.pathname + '#' + code;
+
+// ---------- HOST ----------
+function hostCreate(name, resume){
+  isHost = true; ui.busy = true; ui.error = ''; render();
+  let tries = 0;
+  const code = resume ? resume.code : newCode();
+  if (resume) { game = resume; game.players.forEach(p => p.online = p.id === token); }
+  else { game = createGame(code, token); addPlayer(game, token, name); }
+  const open = () => {
+    peer = new Peer(PREFIX + game.code);
+    peer.on('open', () => { ui.busy = false; location.hash = game.code; hostBroadcast(); });
+    peer.on('connection', conn => {
+      conn.on('data', d => hostOnData(conn, d));
+      conn.on('close', () => hostOnClose(conn));
+    });
+    peer.on('disconnected', () => { if (!peer.destroyed) peer.reconnect(); });
+    peer.on('error', err => {
+      if (err.type === 'unavailable-id') {
+        peer.destroy();
+        if (resume && tries++ < 8) { ui.error = 'Sto riprendendo la stanza…'; render(); setTimeout(open, 3000); }
+        else if (!resume) { game.code = newCode(); open(); }
+        else { ui.busy=false; ui.error = 'Non riesco a riprendere la stanza. Creane una nuova.'; render(); }
+      } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error') {
+        ui.busy=false; ui.error = 'Connessione assente. Controlla internet e riprova.'; render();
+      }
+    });
+  };
+  open();
+}
+
+function hostOnData(conn, d){
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'hello') {
+    const name = String(d.name || '').trim().slice(0, 16) || 'Giocatore';
+    const err = addPlayer(game, String(d.token), name);
+    if (err) { conn.send({ t:'error', msg: err, fatal: true }); setTimeout(()=>conn.close(), 500); return; }
+    for (const [c, id] of conns) if (id === d.token && c !== conn) { conns.delete(c); try{ c.close(); }catch(e){} }
+    conns.set(conn, String(d.token));
+    hostBroadcast();
+    return;
+  }
+  const pid = conns.get(conn);
+  if (!pid) return;
+  hostAction(pid, d, msg => conn.send({ t:'error', msg }));
+}
+
+function hostOnClose(conn){
+  const pid = conns.get(conn);
+  conns.delete(conn);
+  if (!pid || [...conns.values()].includes(pid)) return;
+  const p = findPlayer(game, pid);
+  if (!p) return;
+  if (game.phase === 'lobby') removePlayer(game, pid); else p.online = false;
+  hostBroadcast();
+}
+
+function hostAction(pid, d, fail){
+  let err = null;
+  if (d.t === 'bet') err = placeBet(game, pid, d.n);
+  else if (d.t === 'play') err = playCard(game, pid, d.card, d.high);
+  else if (pid === token) {
+    if (d.t === 'start') err = startGame(game);
+    else if (d.t === 'kick') { removePlayer(game, d.id); for (const [c,id] of conns) if (id===d.id){ c.send({t:'error',msg:"L'host ti ha rimosso dalla stanza",fatal:true}); conns.delete(c); setTimeout(()=>c.close(),300);} }
+    else if (d.t === 'next') nextHand(game);
+    else if (d.t === 'auto') err = autoMove(game);
+    else if (d.t === 'lobby') backToLobby(game);
+    else if (d.t === 'settings') { game.settings = { ...game.settings, ...d.settings }; game.players.forEach(p=>p.lives=game.settings.lives); }
+  }
+  if (err) return fail(err);
+  hostBroadcast();
+}
+
+function hostBroadcast(){
+  for (const [c, id] of conns) { try { c.send({ t:'state', view: viewFor(game, id) }); } catch(e){} }
+  store.set('bis-host', game);
+  if (game.phase === 'trick' && !trickTimer) {
+    trickTimer = setTimeout(() => { trickTimer = null; afterTrick(game); hostBroadcast(); }, game.handSize === 1 ? 3500 : 2200);
+  }
+  onView(viewFor(game, token));
+}
+
+// ---------- GIOCATORE ----------
+function joinGame(code, name){
+  isHost = false; ui.busy = true; ui.error = ''; render();
+  store.set('bis-name', name);
+  const connect = () => {
+    hostConn = peer.connect(PREFIX + code, { reliable: true });
+    hostConn.on('open', () => { ui.conn = 'ok'; hostConn.send({ t:'hello', token, name }); });
+    hostConn.on('data', d => {
+      if (d.t === 'state') { ui.busy = false; location.hash = code; onView(d.view); }
+      else if (d.t === 'error') {
+        if (d.fatal) { ui.fatal = true; leave(d.msg); } else toast(d.msg);
+      }
+    });
+    hostConn.on('close', () => {
+      if (ui.fatal || ui.screen === 'home') return;
+      ui.conn = 'lost'; render();
+      clearTimeout(retryTimer); retryTimer = setTimeout(connect, 3000);
+    });
+  };
+  const makePeer = () => {
+    peer = new Peer();
+    peer.on('open', connect);
+    peer.on('disconnected', () => { if (!peer.destroyed) peer.reconnect(); });
+    peer.on('error', err => {
+      if (err.type === 'peer-unavailable') {
+        if (ui.view) { ui.conn = 'lost'; render(); clearTimeout(retryTimer); retryTimer = setTimeout(connect, 3000); }
+        else { ui.busy=false; ui.error = `Nessuna partita aperta con il codice ${code}.`; render(); }
+      } else if (['network','server-error','socket-error'].includes(err.type)) {
+        ui.busy=false; ui.error = 'Connessione assente. Controlla internet e riprova.'; render();
+      }
+    });
+  };
+  ui.fatal = false;
+  makePeer();
+}
+
+function send(d){
+  if (isHost) hostAction(token, d, msg => toast(msg));
+  else if (hostConn && hostConn.open) hostConn.send(d);
+  else toast('Connessione persa, sto riprovando…');
+}
+
+function leave(msg){
+  clearTimeout(retryTimer); clearTimeout(trickTimer); trickTimer = null;
+  if (isHost) store.del('bis-host');
+  try { peer && peer.destroy(); } catch(e){}
+  peer = null; hostConn = null; game = null; isHost = false; conns.clear();
+  ui.view = null; ui.screen = 'home'; ui.busy = false; ui.error = msg || '';
+  history.replaceState(null, '', location.pathname);
+  render();
+}
+
+let lastTurn = null;
+function onView(v){
+  ui.view = v; ui.screen = v.phase === 'lobby' ? 'lobby' : 'game';
+  if (v.turn === v.me && lastTurn !== v.me && navigator.vibrate) navigator.vibrate(60);
+  lastTurn = v.turn;
+  render();
+}
+
+// ---------- DISEGNO ----------
+const SUIT_SVG = {
+  denari:'<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="currentColor"/><circle cx="20" cy="20" r="10" fill="none" stroke="#fbf6e9" stroke-width="2"/><circle cx="20" cy="20" r="3.5" fill="#fbf6e9"/></svg>',
+  coppe:'<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 6h26c0 13-5 18-13 19C12 24 7 19 7 6z" fill="currentColor"/><rect x="18" y="24" width="4" height="7" fill="currentColor"/><ellipse cx="20" cy="33" rx="9" ry="3.5" fill="currentColor"/></svg>',
+  spade:'<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2l3.5 6v19h-7V8z" fill="currentColor"/><rect x="10" y="26.5" width="20" height="3.5" rx="1.5" fill="currentColor"/><rect x="18.3" y="30" width="3.4" height="6" fill="currentColor"/><circle cx="20" cy="37" r="2.6" fill="currentColor"/></svg>',
+  bastoni:'<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M17.5 38L14 6c1-4 11-4 12 0l-3.5 32z" fill="currentColor"/><circle cx="14.5" cy="14" r="3" fill="currentColor"/><circle cx="25.5" cy="21" r="3" fill="currentColor"/><circle cx="15.5" cy="28" r="2.6" fill="currentColor"/></svg>',
+};
+function cardHtml(c, { small=false, click=false, disabled=true } = {}){
+  const suit = cardSuit(c), lbl = RANK_LABELS[cardRank(c)], p = isPaolo(c);
+  return `<button class="card s-${suit}${p?' paolo':''}${small?' small':''}" ${click?`data-card="${c}"`:''} ${disabled?'disabled':''} aria-label="${esc(cardName(c))}">
+    <span class="i tl">${lbl}</span>${SUIT_SVG[suit]}<span class="i br">${lbl}</span>${p?'<span class="tag">PAOLO</span>':''}</button>`;
+}
+const backHtml = () => `<div class="card back" aria-label="La tua carta coperta"></div>`;
+const nameOf = (v, id) => { const p = v.players.find(p=>p.id===id); return p ? (id===v.me ? 'Tu' : p.name) : '?'; };
+
+function renderHome(){
+  const saved = store.get('bis-host');
+  const hashCode = (location.hash||'').replace('#','').toUpperCase().slice(0,4);
+  const name = store.get('bis-name') || '';
+  $app.innerHTML = `<div class="home">
+    <div class="brand">
+      <div class="fan">${cardHtml(8)}${cardHtml(21)}${cardHtml(PAOLO_ID)}${cardHtml(19)}</div>
+      <h1>Bischino</h1>
+      <p>Indovina quante prese farai. Da 2 a ${MAX_PLAYERS} amici.</p>
+    </div>
+    <div class="panel">
+      ${ui.error ? `<div class="banner">${esc(ui.error)}</div>` : ''}
+      <label class="lbl" for="nm">Il tuo nome</label>
+      <input id="nm" class="field" maxlength="16" autocomplete="nickname" placeholder="Come ti chiamano" value="${esc(name)}">
+      ${hashCode ? `
+        <div style="height:14px"></div>
+        <button class="btn gold" id="join" ${ui.busy?'disabled':''}>${ui.busy?'Mi collego…':`Entra nella partita ${esc(hashCode)}`}</button>
+        <div class="or">oppure</div>
+        <button class="btn ghost" id="create" ${ui.busy?'disabled':''}>Crea una nuova partita</button>
+      ` : `
+        <div style="height:14px"></div>
+        <button class="btn gold" id="create" ${ui.busy?'disabled':''}>${ui.busy&&isHost?'Creo la stanza…':'Crea una partita'}</button>
+        <div class="or">oppure entra con un codice</div>
+        <div class="row"><input id="code" class="field code-input" maxlength="4" placeholder="ABCD" autocapitalize="characters">
+        <button class="btn ghost" id="join" style="flex:0 0 auto;width:auto" ${ui.busy?'disabled':''}>${ui.busy&&!isHost?'…':'Entra'}</button></div>
+      `}
+      ${saved && saved.phase !== 'lobby' && saved.hostId === token ? `<div style="height:10px"></div><button class="btn ghost" id="resume">Riprendi la partita ${esc(saved.code)}</button>` : ''}
+    </div>
+    <button class="x center" id="rules">Come si gioca</button>
+  </div>`;
+  const getName = () => { const n = document.getElementById('nm').value.trim(); if (!n) { toast('Scrivi il tuo nome'); return null; } store.set('bis-name', n); return n; };
+  const c = document.getElementById('create'); if (c) c.onclick = () => { const n=getName(); if(n){ history.replaceState(null,'',location.pathname); hostCreate(n); } };
+  const j = document.getElementById('join'); if (j) j.onclick = () => {
+    const n = getName(); if (!n) return;
+    const ci = document.getElementById('code');
+    const code = (ci ? ci.value : hashCode).trim().toUpperCase();
+    if (code.length !== 4) return toast('Il codice ha 4 lettere');
+    joinGame(code, n);
+  };
+  const r = document.getElementById('resume'); if (r) r.onclick = () => hostCreate(null, saved);
+  document.getElementById('rules').onclick = () => { ui.rules = true; render(); };
+}
+
+function renderLobby(v){
+  const host = v.me === v.hostId;
+  $app.innerHTML = `<div class="lobby">
+    <div class="top"><h2>Stanza</h2><button class="iconbtn" id="leave">Esci</button></div>
+    <div class="panel codebox">
+      <div class="muted">Codice della partita</div>
+      <div class="code">${esc(v.code)}</div>
+      <button class="btn gold" id="share">Invita gli amici</button>
+    </div>
+    <div class="panel">
+      <div class="top" style="margin:0 0 4px"><strong>Giocatori</strong><span class="muted">${v.players.length} su ${MAX_PLAYERS}</span></div>
+      <ul class="plist">${v.players.map(p => `<li><span class="nm">${esc(p.name)}</span>
+        ${p.id===v.hostId?'<span class="pill">host</span>':''}${p.id===v.me?'<span class="pill">tu</span>':''}
+        ${host && p.id!==v.me ? `<button class="x" data-kick="${esc(p.id)}">Rimuovi</button>`:''}</li>`).join('')}</ul>
+    </div>
+    ${host ? `<div class="panel">
+      <div class="stepper"><span>Vite a testa</span><span class="ctl"><button data-s="lives" data-d="-1" aria-label="Meno vite">−</button><b>${v.settings.lives}</b><button data-s="lives" data-d="1" aria-label="Più vite">+</button></span></div>
+      <div class="stepper"><span>Carte alla prima mano</span><span class="ctl"><button data-s="maxCards" data-d="-1" aria-label="Meno carte">−</button><b>${v.settings.maxCards}</b><button data-s="maxCards" data-d="1" aria-label="Più carte">+</button></span></div>
+      <p class="muted" style="margin:6px 0 0;font-size:14px">Con tanti giocatori le carte si riducono da sole: 40 carte devono bastare per tutti.</p>
+    </div>
+    <button class="btn gold" id="start" ${v.players.length<2?'disabled':''}>${v.players.length<2?'Aspetta almeno un amico':'Inizia la partita'}</button>`
+    : `<p class="center muted">Aspetta che l'host avvii la partita.</p>`}
+  </div>`;
+  document.getElementById('leave').onclick = () => { if (confirm(host ? 'Chiudere la stanza per tutti?' : 'Uscire dalla stanza?')) leave(); };
+  document.getElementById('share').onclick = async () => {
+    const url = shareUrl(v.code);
+    if (navigator.share) { try { await navigator.share({ title:'Bischino', text:`Gioca a Bischino con me, codice ${v.code}`, url }); } catch(e){} }
+    else { try { await navigator.clipboard.writeText(url); toast('Link copiato'); } catch(e){ prompt('Copia questo link', url); } }
+  };
+  $app.querySelectorAll('[data-kick]').forEach(b => b.onclick = () => send({ t:'kick', id:b.dataset.kick }));
+  $app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => {
+    const k = b.dataset.s, lim = k==='lives' ? [1,9] : [1,10];
+    const val = Math.min(lim[1], Math.max(lim[0], v.settings[k] + Number(b.dataset.d)));
+    send({ t:'settings', settings:{ [k]: val } });
+  });
+  const s = document.getElementById('start'); if (s) s.onclick = () => send({ t:'start' });
+}
+
+function renderGame(v){
+  const host = v.me === v.hostId;
+  const me = v.players.find(p => p.id === v.me);
+  const myTurn = v.turn === v.me;
+  const turnName = v.turn ? nameOf(v, v.turn) : '';
+  const turnPlayer = v.players.find(p => p.id === v.turn);
+
+  let status = '', hint = '', action = '';
+  if (v.phase === 'betting') {
+    status = myTurn ? 'Quante prese farai?' : `${esc(turnName)} sta pensando…`;
+    if (v.hiddenCard) hint = 'Mano da una carta: vedi le carte degli altri ma non la tua.';
+    if (myTurn) {
+      const f = v.forbidden;
+      action = `<div class="bets">${Array.from({length:v.handSize+1},(_,n)=>`<button data-bet="${n}" ${n===f?'disabled':''}>${n}</button>`).join('')}</div>
+        ${f!==null?`<p class="hint" style="margin-top:10px">Sei l'ultimo: non puoi dire ${f}, altrimenti la somma farebbe pari.</p>`:''}`;
+    }
+  } else if (v.phase === 'playing') {
+    status = myTurn ? 'Tocca a te: gioca una carta' : `Tocca a ${esc(turnName)}`;
+  } else if (v.phase === 'trick') {
+    status = v.trickWinner === v.me ? 'Prendi tu!' : `Prende ${esc(nameOf(v, v.trickWinner))}`;
+  }
+
+  const handHtml = v.hiddenCard
+    ? `<div class="hand">${backHtml()}</div>`
+    : `<div class="hand${myTurn&&v.phase==='playing'?' active':''}">${(v.myHand||[]).map(c => cardHtml(c, { click:true, disabled: !(myTurn && v.phase==='playing') })).join('')}</div>`;
+
+  const allBet = v.order.every(id => v.players.find(p=>p.id===id).bet !== undefined);
+  const seats = v.players.map(p => {
+    const inHand = v.order.includes(p.id);
+    const score = !inHand ? (p.out ? 'Eliminato' : '') :
+      `Detto <b>${p.bet ?? '–'}</b>${v.phase!=='betting'||allBet?` &nbsp;Fatte <b>${p.won ?? 0}</b>`:''}`;
+    return `<div class="seat${p.id===v.turn?' turn':''}${p.id===v.me?' me':''}${!p.online?' off':''}${p.out?' out':''}">
+      ${p.id===v.dealerId?'<span class="dealer" title="Mazziere">M</span>':''}
+      <div class="sn">${esc(p.name)}${p.id===v.me?' (tu)':''}</div>
+      <div class="lives" aria-label="${Math.max(0,p.lives)} vite">${Array.from({length:v.settings.lives},(_,i)=>`<i class="${i<p.lives?'':'lost'}"></i>`).join('')}</div>
+      <div class="score">${!p.online?'Offline':score}</div>
+      ${p.shown!==null&&p.shown!==undefined?`<div class="mini">${cardHtml(p.shown,{small:true})}</div>`:''}
+    </div>`;
+  }).join('');
+
+  let middle = '';
+  if (v.phase === 'handover' || v.phase === 'gameover') {
+    const rows = v.handResult.map(r => `<tr><td>${esc(nameOf(v,r.id))}</td><td>${r.bet}</td><td>${r.won}</td>
+      <td class="${r.delta?'minus':'ok'}">${r.delta?'−'+r.delta:'giusto'}</td><td>${Math.max(0,r.lives)}</td></tr>`).join('');
+    const winnerNames = (v.winners||[]).map(id => esc(nameOf(v,id)));
+    middle = `<div class="panel" style="margin:14px 0">
+      ${v.phase==='gameover' ? `<div class="winner">${(v.winners||[]).length===1&&v.winners[0]===v.me?'<h2>Hai vinto!</h2>':`<div class="muted">${winnerNames.length>1?'Pareggio tra':'Ha vinto'}</div><h2>${winnerNames.join(' e ')}</h2>`}</div>` : `<h2 style="font-size:22px;margin-bottom:8px">Fine della mano ${v.handNo}</h2>`}
+      <table class="results"><tr><th>Giocatore</th><th>Detto</th><th>Fatte</th><th>Vite perse</th><th>Vite</th></tr>${rows}</table>
+    </div>
+    ${host ? (v.phase==='gameover' ? `<button class="btn gold" data-do="lobby">Nuova partita</button>` : `<button class="btn gold" data-do="next">Prossima mano</button>`)
+      : `<p class="center muted">${v.phase==='gameover'?"L'host può avviare una nuova partita.":"Aspetta che l'host distribuisca la prossima mano."}</p>`}`;
+  } else {
+    middle = `<div class="table">${v.table.length ? v.table.map(t => `<div class="played${t.id===v.trickWinner?' win':''}">
+        ${cardHtml(t.card)}<span>${esc(nameOf(v,t.id))}${isPaolo(t.card)?(t.high?' (alto)':' (basso)'):''}</span></div>`).join('')
+        : `<span class="muted">${v.phase==='betting'?'Prima i pronostici, poi si gioca':'Il tavolo è vuoto'}</span>`}</div>
+      <div class="status" aria-live="polite">${status}</div>
+      ${hint?`<p class="hint">${hint}</p>`:''}
+      ${host && turnPlayer && !turnPlayer.online ? `<button class="btn ghost" data-do="auto" style="margin-bottom:10px">${esc(turnPlayer.name)} è offline: gioca al posto suo</button>` : ''}
+      ${action}
+      ${me && !me.out ? handHtml : '<p class="center muted">Sei fuori dalla partita, ma puoi continuare a guardare.</p>'}`;
+  }
+
+  $app.innerHTML = `
+    ${ui.conn==='lost'&&!host?'<div class="banner">Connessione persa con l\'host, sto riprovando…</div>':''}
+    <div class="top">
+      <div><h2>Mano ${v.handNo}</h2><div class="sub">${v.handSize} ${v.handSize===1?'carta':'carte'} a testa, stanza ${esc(v.code)}</div></div>
+      <div class="row" style="flex:0 0 auto;gap:6px"><button class="iconbtn" id="rules">Regole</button><button class="iconbtn" id="leave">Esci</button></div>
+    </div>
+    <div class="seats">${seats}</div>
+    ${middle}`;
+
+  document.getElementById('rules').onclick = () => { ui.rules = true; render(); };
+  document.getElementById('leave').onclick = () => { if (confirm(host ? 'Se esci, la partita finisce per tutti. Uscire?' : 'Uscire dalla partita?')) leave(); };
+  $app.querySelectorAll('[data-bet]').forEach(b => b.onclick = () => send({ t:'bet', n:Number(b.dataset.bet) }));
+  $app.querySelectorAll('[data-do]').forEach(b => b.onclick = () => send({ t:b.dataset.do }));
+  $app.querySelectorAll('.hand [data-card]').forEach(b => b.onclick = () => {
+    const c = Number(b.dataset.card);
+    if (isPaolo(c)) { ui.paolo = c; render(); } else send({ t:'play', card:c });
+  });
+}
+
+function renderOverlays(){
+  document.querySelectorAll('.overlay').forEach(o => o.remove());
+  if (ui.paolo !== null) {
+    const o = document.createElement('div'); o.className = 'overlay';
+    o.innerHTML = `<div class="sheet center"><h2>Giochi il Paolo</h2><p class="muted">Decidi quanto vale in questa presa.</p>
+      <button class="btn gold" data-h="1">Alto: batte tutte le carte</button><button class="btn" data-h="0">Basso: perde contro tutte</button>
+      <button class="x" data-h="x" style="margin-top:12px">Annulla</button></div>`;
+    o.querySelectorAll('[data-h]').forEach(b => b.onclick = () => {
+      const h = b.dataset.h, c = ui.paolo; ui.paolo = null;
+      if (h !== 'x') send({ t:'play', card:c, high: h==='1' }); else render();
+    });
+    document.body.appendChild(o);
+  }
+  if (ui.rules) {
+    const o = document.createElement('div'); o.className = 'overlay';
+    o.innerHTML = `<div class="sheet"><h2>Come si gioca</h2>
+      <p>Si usa un mazzo da 40 carte. Alla prima mano ognuno riceve 5 carte (o meno, se siete in tanti), poi a ogni mano una carta in meno. Dopo la mano da una carta si ricomincia dall'inizio.</p>
+      <p>Guardate le vostre carte e, a turno, ognuno dice quante prese pensa di fare. Chi parla per ultimo è il mazziere, e non può dire il numero che renderebbe la somma dei pronostici uguale alle carte in mano.</p>
+      <p>Poi si gioca una carta a testa: vince la presa la carta più forte, e chi prende apre il giro dopo. Non c'è obbligo di rispondere al seme.</p>
+      <p>La forza va dall'asso (la più bassa) al re (la più alta): A, 2, 3, 4, 5, 6, 7, fante, cavallo, re. A parità di valore conta il seme: ${SUITS.map(s=>SUIT_NAMES[s]).join(', poi ')}, dal più debole al più forte.</p>
+      <p>Il Paolo (${RANK_NAMES[PAOLO.rank].toLowerCase()} di ${SUIT_NAMES[PAOLO.suit].toLowerCase()}) è speciale: quando lo giochi decidi se vale più di tutte o meno di tutte.</p>
+      <p>Nella mano da una carta non vedi la tua ma vedi quelle degli altri: fai il pronostico basandoti su quelle. Le carte si scoprono tutte insieme. Se il Paolo ce l'hai tu, vale in base a quello che hai detto: alto se hai detto 1, basso se hai detto 0.</p>
+      <p>A fine mano perdi tante vite quanta è la differenza tra ciò che hai detto e le prese fatte. Chi resta senza vite è fuori; vince l'ultimo rimasto.</p>
+      <button class="btn gold" id="closeRules">Ho capito</button></div>`;
+    o.querySelector('#closeRules').onclick = () => { ui.rules = false; render(); };
+    o.onclick = e => { if (e.target === o) { ui.rules = false; render(); } };
+    document.body.appendChild(o);
+  }
+}
+
+function render(){
+  if (ui.screen === 'home' || !ui.view) renderHome();
+  else if (ui.screen === 'lobby') renderLobby(ui.view);
+  else renderGame(ui.view);
+  renderOverlays();
+}
+
+window.addEventListener('beforeunload', e => { if (isHost && game && game.phase !== 'lobby') { e.preventDefault(); e.returnValue = ''; } });
+if (typeof Peer === 'undefined') ui.error = 'Non riesco a caricare il gioco: controlla la connessione e ricarica la pagina.';
+render();
+</script>
+</body>
+</html>
