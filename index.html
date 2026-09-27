@@ -711,7 +711,7 @@ function renderGame(v){
   let middle = '';
   if (v.phase === 'handover' || v.phase === 'gameover') {
     const rows = v.handResult.map(r => `<tr><td>${esc(nameOf(v,r.id))}</td><td>${r.bet}</td><td>${r.won}</td>
-      <td class="${r.delta?'minus':'ok'}">${r.delta?'−'+r.delta:'giusto'}</td><td>${r.lives}</td></tr>`).join('');
+      <td class="${r.delta?'minus':'ok'}">${r.delta?'−'+r.delta:'0'}</td><td>${r.lives}</td></tr>`).join('');
     const winnerNames = (v.winners||[]).map(id => esc(nameOf(v,id)));
     middle = `<div class="panel" style="margin:14px 0">
       ${v.phase==='gameover' ? `<div class="winner">${(v.winners||[]).length===1&&v.winners[0]===v.me?'<h2>Hai vinto!</h2>':(winnerNames.length ? `<div class="muted">Ha vinto</div><h2>${winnerNames[0]}</h2>` : `<h2>Pareggio</h2><div class="muted" style="margin-top:6px">Nell'ultima mano più giocatori sono rimasti a pari vite: nessun vincitore.</div>`)}</div>` : `<h2 style="font-size:22px;margin-bottom:8px">Fine della mano ${v.handNo}</h2>`}
