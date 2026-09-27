@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#173d2f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Bischino</title>
+<title>Bisca</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
@@ -373,15 +373,15 @@ function viewFor(s, me) {
 </script>
 <script>
 // ===== RETE E INTERFACCIA =====
-const PREFIX = 'bischino-app-v1-';
+const PREFIX = 'bisca-app-v1-';
 const $app = document.getElementById('app');
 const store = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
   set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
   del(k){ try{ localStorage.removeItem(k); }catch(e){} },
 };
-let token = store.get('bis-token');
-if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); store.set('bis-token', token); }
+let token = store.get('bisca-token');
+if (!token) { token = Math.random().toString(36).slice(2) + Date.now().toString(36); store.set('bisca-token', token); }
 
 const ui = { screen: 'home', view: null, error: '', busy: false, rules: false, paolo: null, conn: 'ok' };
 let peer = null, hostConn = null, isHost = false, game = null, trickTimer = null, retryTimer = null;
@@ -465,7 +465,7 @@ function hostAction(pid, d, fail){
 
 function hostBroadcast(){
   for (const [c, id] of conns) { try { c.send({ t:'state', view: viewFor(game, id) }); } catch(e){} }
-  store.set('bis-host', game);
+  store.set('bisca-host', game);
   if (game.phase === 'trick' && !trickTimer) {
     trickTimer = setTimeout(() => { trickTimer = null; afterTrick(game); hostBroadcast(); }, game.handSize === 1 ? 3500 : 2200);
   }
@@ -475,7 +475,7 @@ function hostBroadcast(){
 // ---------- GIOCATORE ----------
 function joinGame(code, name){
   isHost = false; ui.busy = true; ui.error = ''; render();
-  store.set('bis-name', name);
+  store.set('bisca-name', name);
   const connect = () => {
     hostConn = peer.connect(PREFIX + code, { reliable: true });
     hostConn.on('open', () => { ui.conn = 'ok'; hostConn.send({ t:'hello', token, name }); });
@@ -516,7 +516,7 @@ function send(d){
 
 function leave(msg){
   clearTimeout(retryTimer); clearTimeout(trickTimer); trickTimer = null;
-  if (isHost) store.del('bis-host');
+  if (isHost) store.del('bisca-host');
   try { peer && peer.destroy(); } catch(e){}
   peer = null; hostConn = null; game = null; isHost = false; conns.clear();
   ui.view = null; ui.screen = 'home'; ui.busy = false; ui.error = msg || '';
@@ -548,13 +548,13 @@ const backHtml = () => `<div class="card back" aria-label="La tua carta coperta"
 const nameOf = (v, id) => { const p = v.players.find(p=>p.id===id); return p ? (id===v.me ? 'Tu' : p.name) : '?'; };
 
 function renderHome(){
-  const saved = store.get('bis-host');
+  const saved = store.get('bisca-host');
   const hashCode = (location.hash||'').replace('#','').toUpperCase().slice(0,4);
-  const name = store.get('bis-name') || '';
+  const name = store.get('bisca-name') || '';
   $app.innerHTML = `<div class="home">
     <div class="brand">
       <div class="fan">${cardHtml(8)}${cardHtml(21)}${cardHtml(PAOLO_ID)}${cardHtml(19)}</div>
-      <h1>Bischino</h1>
+      <h1>Bisca</h1>
       <p>Indovina quante prese farai. Da 2 a ${MAX_PLAYERS} amici.</p>
     </div>
     <div class="panel">
@@ -577,7 +577,7 @@ function renderHome(){
     </div>
     <button class="x center" id="rules">Come si gioca</button>
   </div>`;
-  const getName = () => { const n = document.getElementById('nm').value.trim(); if (!n) { toast('Scrivi il tuo nome'); return null; } store.set('bis-name', n); return n; };
+  const getName = () => { const n = document.getElementById('nm').value.trim(); if (!n) { toast('Scrivi il tuo nome'); return null; } store.set('bisca-name', n); return n; };
   const c = document.getElementById('create'); if (c) c.onclick = () => { const n=getName(); if(n){ history.replaceState(null,'',location.pathname); hostCreate(n); } };
   const j = document.getElementById('join'); if (j) j.onclick = () => {
     const n = getName(); if (!n) return;
@@ -616,7 +616,7 @@ function renderLobby(v){
   document.getElementById('leave').onclick = () => { if (confirm(host ? 'Chiudere la stanza per tutti?' : 'Uscire dalla stanza?')) leave(); };
   document.getElementById('share').onclick = async () => {
     const url = shareUrl(v.code);
-    if (navigator.share) { try { await navigator.share({ title:'Bischino', text:`Gioca a Bischino con me, codice ${v.code}`, url }); } catch(e){} }
+    if (navigator.share) { try { await navigator.share({ title:'Bisca', text:`Gioca a Bisca con me, codice ${v.code}`, url }); } catch(e){} }
     else { try { await navigator.clipboard.writeText(url); toast('Link copiato'); } catch(e){ prompt('Copia questo link', url); } }
   };
   $app.querySelectorAll('[data-kick]').forEach(b => b.onclick = () => send({ t:'kick', id:b.dataset.kick }));
@@ -727,7 +727,7 @@ function renderOverlays(){
     o.innerHTML = `<div class="sheet"><h2>Come si gioca</h2>
       <p>Si usa un mazzo da 40 carte. Alla prima mano ognuno riceve 5 carte (o meno, se siete in tanti), poi a ogni mano una carta in meno. Dopo la mano da una carta si ricomincia dall'inizio.</p>
       <p>Guardate le vostre carte e, a turno, ognuno dice quante prese pensa di fare. Chi parla per ultimo è il mazziere, e non può dire il numero che renderebbe la somma dei pronostici uguale alle carte in mano.</p>
-      <p>Poi si gioca una carta a testa: vince la presa la carta più forte, e chi prende apre il giro dopo. Non c'è obbligo di rispondere al seme.</p>
+      <p>Poi si gioca una carta a testa. Il primo giro lo apre chi ha parlato per primo, cioè il giocatore dopo il mazziere. Vince la presa la carta più forte, e chi prende apre il giro successivo, fino alla fine della mano. Non c'è obbligo di rispondere al seme.</p><p>A ogni nuova mano si rimescola, il mazziere passa al giocatore successivo e si riparte allo stesso modo.</p>
       <p>La forza va dall'asso (la più bassa) al re (la più alta): A, 2, 3, 4, 5, 6, 7, fante, cavallo, re. A parità di valore conta il seme: ${SUITS.map(s=>SUIT_NAMES[s]).join(', poi ')}, dal più debole al più forte.</p>
       <p>Il Paolo (${RANK_NAMES[PAOLO.rank].toLowerCase()} di ${SUIT_NAMES[PAOLO.suit].toLowerCase()}) è speciale: quando lo giochi decidi se vale più di tutte o meno di tutte.</p>
       <p>Nella mano da una carta non vedi la tua ma vedi quelle degli altri: fai il pronostico basandoti su quelle. Le carte si scoprono tutte insieme. Se il Paolo ce l'hai tu, vale in base a quello che hai detto: alto se hai detto 1, basso se hai detto 0.</p>
